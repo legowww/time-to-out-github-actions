@@ -1,0 +1,12 @@
+spring.jpa:
+  database: mysql
+  hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+  hibernate.ddl-auto: update
+  show-sql: true
+
+spring.datasource:
+  hikari.maximum-pool-size: 4
+  url: jdbc:mysql://my-rds.cp74kiovk3na.ap-northeast-2.rds.amazonaws.com:3306/tto?serverTimezone=Asia/Seoul
+  username: admin
+  password: gudwls124!
+  driver-class-name: com.mysql.cj.jdbc.Driver
