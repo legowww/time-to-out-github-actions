@@ -37,6 +37,6 @@ public class MainController {
     @ResponseBody
     public String han() {
         log.info("한글");
-        return "한글";
+        return "한글반환";
     }
 }
