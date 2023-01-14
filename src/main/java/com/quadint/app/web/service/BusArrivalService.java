@@ -39,7 +39,6 @@ public class BusArrivalService {
                 break;
             }
         }
-        log.info("[info]busTimeResponse=" + busTimeResponse);
         return busTimeResponse;
     }
 
@@ -47,14 +46,11 @@ public class BusArrivalService {
         try {
             StringBuilder url = getBusArrivalStationUrl(bstopId, routeId);
             JSONObject json = XML.toJSONObject(url.toString());
-            log.info("[getBusArrivalStationTime]json={}", json.toString());
-
 
             JSONObject serviceResult = (JSONObject) json.get("ServiceResult");
             JSONObject msgHeader = (JSONObject) serviceResult.get("msgHeader");
             int resultCode = Integer.parseInt(msgHeader.get("resultCode").toString());
             int totalCount = Integer.parseInt(msgHeader.get("totalCount").toString());
-            log.info("[info]bstopId=" + bstopId + " routeId=" + routeId + " resultCode=" + resultCode + " totalCount=" + totalCount);
             //조회 결과 없으면 resultCode 4
             if (resultCode == 0) {
                 JSONObject msgBody = (JSONObject) serviceResult.get("msgBody");
@@ -67,8 +63,6 @@ public class BusArrivalService {
                     String LATEST_STOP_ID = item.get("LATEST_STOP_ID").toString();
 
                     int arrivalestimatetime = Integer.parseInt(item.get("ARRIVALESTIMATETIME").toString());
-                    log.info("[info]" + BUS_NUM_PLATE + " " + ROUTEID + "버스가 " + LATEST_STOP_NAME +
-                            "(" + LATEST_STOP_ID + ")에서 " + bstopid + "정류장 도착" + arrivalestimatetime + "초 전 입니다.");
                     return new BusTimeDto(LATEST_STOP_ID, arrivalestimatetime);
                 }
             }
