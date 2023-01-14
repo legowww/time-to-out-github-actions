@@ -1,13 +1,14 @@
 package com.quadint.app.web.service;
 
+import com.quadint.app.domain.Time;
+import com.quadint.app.domain.route.Route;
 import com.quadint.app.domain.route.TimeRoute;
 import com.quadint.app.domain.time.BusTimeResponse;
-import com.quadint.app.domain.Time;
-import com.quadint.app.web.controller.request.LocationCoordinateRequest;
-import com.quadint.app.domain.route.Route;
 import com.quadint.app.domain.transportation.Bus;
 import com.quadint.app.domain.transportation.TransportationType;
 import com.quadint.app.domain.transportation.Walk;
+import com.quadint.app.web.controller.request.LocationCoordinateRequest;
+import com.quadint.app.web.exception.TtoAppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
@@ -132,19 +133,23 @@ public class RouteService {
 
                     }
                 }
-
                 route.setTotalTime(totalTime);
                 routes.add(route);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new TtoAppException("calculateRoute IOException error");
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new TtoAppException("calculateRoute ParseException error");
         }
         Collections.sort(routes);
 
         List<Route> optimal = List.of(routes.get(0), routes.get(1), routes.get(2)); //목적지까지의 도착 소요시간이 적게 걸리는 상위 3개의 경로 추출
         List<TimeRoute> result = addOutingTime(optimal); //각 경로에 해당하는 첫 번째(정류장, 역)까지의 걷는 시간 추가
+
+
+        if (result.size() == 0) {
+            throw new TtoAppException("No results were found.");
+        }
         return result;
     }
 

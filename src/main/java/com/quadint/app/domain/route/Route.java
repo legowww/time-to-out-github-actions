@@ -1,8 +1,8 @@
 package com.quadint.app.domain.route;
 
 import com.quadint.app.domain.transportation.Bus;
-import com.quadint.app.domain.transportation.TransportationType;
 import com.quadint.app.domain.transportation.Transportation;
+import com.quadint.app.domain.transportation.TransportationType;
 import lombok.Getter;
 
 import java.util.ArrayList;

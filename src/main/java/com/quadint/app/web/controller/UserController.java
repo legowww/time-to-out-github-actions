@@ -3,6 +3,7 @@ package com.quadint.app.web.controller;
 
 import com.quadint.app.domain.User;
 import com.quadint.app.web.controller.request.UserJoinRequest;
+import com.quadint.app.web.controller.response.Response;
 import com.quadint.app.web.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,8 +16,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public String join(@RequestBody UserJoinRequest request) {
+    public Response<String> join(@RequestBody UserJoinRequest request) {
         User joinedUser = userService.join(request.getUsername(), request.getPassword());
-        return joinedUser.toString();
+        return Response.success(joinedUser.toString());
     }
 }
