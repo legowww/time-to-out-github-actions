@@ -5,9 +5,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * 나갈 시간
- */
+
 @Getter
 public class Time {
     private LocalDateTime time;

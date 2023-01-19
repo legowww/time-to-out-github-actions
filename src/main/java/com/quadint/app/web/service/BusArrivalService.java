@@ -48,34 +48,24 @@ public class BusArrivalService {
         try {
             StringBuilder url = getBusArrivalStationUrl(bstopId, routeId);
             JSONObject json = XML.toJSONObject(url.toString());
-            log.info("[getBusArrivalStationTime]json={}", json.toString());
 
 
             JSONObject serviceResult = (JSONObject) json.get("ServiceResult");
             JSONObject msgHeader = (JSONObject) serviceResult.get("msgHeader");
             int resultCode = Integer.parseInt(msgHeader.get("resultCode").toString());
             int totalCount = Integer.parseInt(msgHeader.get("totalCount").toString());
-            log.info("[info]bstopId=" + bstopId + " routeId=" + routeId + " resultCode=" + resultCode + " totalCount=" + totalCount);
-            //조회 결과 없으면 resultCode 4
             if (resultCode == 0) {
                 JSONObject msgBody = (JSONObject) serviceResult.get("msgBody");
                 if (totalCount == 1) {
                     JSONObject item = (JSONObject) msgBody.get("itemList");
-                    String ROUTEID = item.get("ROUTEID").toString();
-                    String bstopid = item.get("BSTOPID").toString();
-                    String BUS_NUM_PLATE = item.get("BUS_NUM_PLATE").toString();
-                    String LATEST_STOP_NAME = item.get("LATEST_STOP_NAME").toString();
                     String LATEST_STOP_ID = item.get("LATEST_STOP_ID").toString();
-
                     int arrivalestimatetime = Integer.parseInt(item.get("ARRIVALESTIMATETIME").toString());
-                    log.info("[info]" + BUS_NUM_PLATE + " " + ROUTEID + "버스가 " + LATEST_STOP_NAME +
-                            "(" + LATEST_STOP_ID + ")에서 " + bstopid + "정류장 도착" + arrivalestimatetime + "초 전 입니다.");
                     return new BusTimeDto(LATEST_STOP_ID, arrivalestimatetime);
                 }
             }
         } catch (IOException e) {
-            /**
-             * IOException(checked exception)을 RuntimeException(unchecked exception) 으로 처리했다.
+            /*
+             * IOException(checked exception)을 TtoAppException(unchecked exception) 으로 처리했다.
              * unchecked exception 이므로 @Controller 메서드에서 throws 를 사용하지 않아도 된다.
              */
             throw new TtoAppException("getBusArrivalStationTime error");

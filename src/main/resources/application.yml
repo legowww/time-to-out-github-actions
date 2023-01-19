@@ -10,3 +10,7 @@ spring.datasource:
   username: admin
   password: gudwls124!
   driver-class-name: com.mysql.cj.jdbc.Driver
+
+jwt:
+  secret-key: tto-security-with-jwt-study-secret-key
+  token-expired-time-ms: 120000
