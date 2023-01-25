@@ -23,9 +23,9 @@ public class MainController {
 
     @PostMapping("/route")
     @ResponseBody
-    public List<TimeRoute> getRoutes(@RequestBody LocationCoordinateRequest lc) {
+    public Response<List<TimeRoute>> getRoutes(@RequestBody LocationCoordinateRequest lc) {
         List<TimeRoute> result = routeService.calculateRoute(lc);
-        return result;
+        return Response.success(result);
     }
 
     @GetMapping("/test")
