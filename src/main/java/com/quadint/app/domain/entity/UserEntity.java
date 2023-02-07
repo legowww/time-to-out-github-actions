@@ -9,19 +9,20 @@ import javax.persistence.*;
 @Entity
 @Getter
 public class UserEntity {
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Integer id;
+    @Setter @Column(nullable = false) String name;
     @Setter @Column(nullable = false) String username;
     @Setter @Column(nullable = false) String password;
 
     @Enumerated(EnumType.STRING) @Column(nullable = false) UserRole role = UserRole.ROLE_USER;
 
     protected UserEntity() {}
-    private UserEntity(String username, String password) {
+    private UserEntity(String name, String username, String password) {
+        this.name = name;
         this.username = username;
         this.password = password;
     }
-    public static UserEntity of(String username, String password) {
-        return new UserEntity(username, password);
+    public static UserEntity of(String name, String username, String password) {
+        return new UserEntity(name, username, password);
     }
 }

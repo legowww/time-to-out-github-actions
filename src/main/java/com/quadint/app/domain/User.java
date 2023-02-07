@@ -18,6 +18,7 @@ import java.util.List;
 @Setter
 public class User implements UserDetails {
     private Integer id;
+    private String name;
     private String username;
     private String password;
     private UserRole role;
@@ -25,6 +26,7 @@ public class User implements UserDetails {
     public static User fromEntity(UserEntity entity) {
         return new User(
                 entity.getId(),
+                entity.getName(),
                 entity.getUsername(),
                 entity.getPassword(),
                 entity.getRole()
@@ -35,6 +37,7 @@ public class User implements UserDetails {
     public String toString() {
         return "User{" +
                 "id=" + id +
+                ", name='" + name + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", role=" + role +

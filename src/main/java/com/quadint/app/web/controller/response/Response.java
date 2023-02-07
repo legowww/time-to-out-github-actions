@@ -13,6 +13,10 @@ public class Response<T> {
         return new Response("success", result);
     }
 
+    public static Response<Void> success() {
+        return new Response("success", null);
+    }
+
     public static Response<Void> error(String message) {
         return new Response(message, null);
     }

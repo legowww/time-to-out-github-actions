@@ -13,4 +13,4 @@ spring.datasource:
 
 jwt:
   secret-key: tto-security-with-jwt-study-secret-key
-  token-expired-time-ms: 120000
+  token-expired-time-ms: 1200000 # 200분
