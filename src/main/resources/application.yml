@@ -1,8 +1,11 @@
 spring.jpa:
   database: mysql
   hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
-  hibernate.ddl-auto: update
-  show-sql: true
+  hibernate.ddl-auto: validate
+#  show-sql: true
+#  properties:
+#    hibernate:
+#      format_sql: true
 
 spring.datasource:
   hikari.maximum-pool-size: 4
@@ -13,4 +16,12 @@ spring.datasource:
 
 jwt:
   secret-key: tto-security-with-jwt-study-secret-key
-  token-expired-time-ms: 1200000 # 200분
+  access-token-expired-time-ms: 1800000
+  refresh-token-expired-time-ms: 604800000
+#  1800000 30분
+
+
+
+
+
+

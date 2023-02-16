@@ -24,4 +24,12 @@ public class TimeRoute implements Comparable<TimeRoute>{
     public int compareTo(TimeRoute o) {
         return this.time.compareTo(o.time);
     }
+
+    @Override
+    public String toString() {
+        return "TimeRoute{" +
+                "time=" + time +
+                ", route=" + route +
+                '}';
+    }
 }

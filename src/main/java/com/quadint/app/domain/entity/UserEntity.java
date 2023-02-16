@@ -10,8 +10,8 @@ import javax.persistence.*;
 @Getter
 public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Integer id;
-    @Setter @Column(nullable = false) String name;
-    @Setter @Column(nullable = false) String username;
+    @Setter @Column(nullable = false) String name; //실명
+    @Setter @Column(nullable = false) String username; //id
     @Setter @Column(nullable = false) String password;
 
     @Enumerated(EnumType.STRING) @Column(nullable = false) UserRole role = UserRole.ROLE_USER;

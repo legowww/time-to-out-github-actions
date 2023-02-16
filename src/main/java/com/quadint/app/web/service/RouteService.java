@@ -77,6 +77,7 @@ public class RouteService {
                 }
             }
         }
+
         List<TimeRoute> result = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
 
@@ -101,6 +102,7 @@ public class RouteService {
             JSONObject json = (JSONObject) parser.parse(url.toString());
             JSONObject result = (JSONObject) json.get("result");
             JSONArray paths = (JSONArray) result.get("path");
+
 
             for (int i = 0; i < paths.size(); ++i) {
                 JSONObject path = (JSONObject) paths.get(i);
@@ -155,20 +157,7 @@ public class RouteService {
 
         Collections.sort(routes);
 
-
-
-        //todo NullPointer
-        List<Route> optimal = List.of(routes.get(0), routes.get(1), routes.get(2)); //목적지까지의 도착 소요시간이 적게 걸리는 상위 3개의 경로 추출
-
-        for (Route route : optimal) {
-            log.info("{}", route);
-            List<Transportation> transportationList = route.getTransportationList();
-            for (Transportation transportation : transportationList) {
-                log.info("{}", transportation.toString());
-            }
-            log.info("\n");
-        }
-        List<TimeRoute> optimalResult = addOutingTime(optimal); //각 경로에 해당하는 첫 번째(정류장, 역)까지의 걷는 시간 추가
+        List<TimeRoute> optimalResult = addOutingTime(routes); //각 경로에 해당하는 첫 번째(정류장, 역)까지의 걷는 시간 추가
         if (optimalResult.size() == 0) {
             throw new TtoAppException("No results were found.");
         }
@@ -178,6 +167,8 @@ public class RouteService {
             throw new TtoAppException("calculateRoute IOException error");
         } catch (ParseException e) {
             throw new TtoAppException("calculateRoute ParseException error");
+        } catch (NullPointerException e) { //잘못된 좌표 입력값
+            throw new TtoAppException("A coordinate value that cannot be calculated.");
         }
     }
 

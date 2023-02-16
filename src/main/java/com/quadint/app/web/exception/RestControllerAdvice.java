@@ -13,7 +13,7 @@ public class RestControllerAdvice {
     public ResponseEntity ttoHandler(RuntimeException e) {
         return ResponseEntity.ok().body(Response.error("unknown error"));
     }
-
+    
     @ExceptionHandler(TtoAppException.class)
     public ResponseEntity ttoHandler(TtoAppException e) {
         return ResponseEntity.ok().body(Response.error(e.getMessage()));

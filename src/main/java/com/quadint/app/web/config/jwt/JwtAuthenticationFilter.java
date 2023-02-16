@@ -1,9 +1,11 @@
 package com.quadint.app.web.config.jwt;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quadint.app.domain.User;
+import com.quadint.app.web.controller.response.LoginSuccessTokenResponse;
 import com.quadint.app.web.controller.response.Response;
-import com.quadint.app.web.exception.TtoAppException;
+import com.quadint.app.web.service.TokenService;
 import com.quadint.app.web.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +26,11 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
+    private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final String key;
-    private final Long expiredTimeMs;
+    private final Long accessTokenExpiredTimeMs;
+    private final Long refreshTokenExpiredTimeMs;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -38,22 +41,29 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             Authentication authenticate = authenticationManager.authenticate(token);
             return authenticate;
         } catch (IOException e) {
-            throw new TtoAppException("attemptAuthentication error");
+            throw new RuntimeException("IOException");
         }
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         User user = (User) authResult.getPrincipal();
-        String token = JwtTokenUtils.generateToken(user.getUsername(), key, expiredTimeMs);
-        response.setContentType("application/json");
-        response.setHeader("Authorization", "Bearer " + token);
+        String accessToken = JwtTokenUtils.generateAccessToken(user.getId(), user.getRole().toString(), key, accessTokenExpiredTimeMs);
+        String refreshToken = JwtTokenUtils.generateRefreshToken(key, refreshTokenExpiredTimeMs);
 
-        new ObjectMapper().writeValue(response.getWriter(), Response.success(token));
+        //refresh token save
+        tokenService.save(user.getId(), refreshToken);
+
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("application/json");
+        new ObjectMapper().writeValue(response.getWriter(), Response.success(new LoginSuccessTokenResponse(accessToken, refreshToken)));
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("application/json");
+
         String errorMessage;
         if (failed instanceof UsernameNotFoundException) {
             errorMessage = "unfounded username";
@@ -64,7 +74,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         else {
             errorMessage = "unidentified Error";
         }
-        response.setContentType("application/json");
 
         new ObjectMapper().writeValue(response.getWriter(), Response.error(errorMessage));
     }

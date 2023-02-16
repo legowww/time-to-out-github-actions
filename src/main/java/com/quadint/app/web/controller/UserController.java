@@ -5,6 +5,7 @@ import com.quadint.app.domain.Favorite;
 import com.quadint.app.domain.User;
 import com.quadint.app.web.controller.request.FavoriteLocationCoordinateRequest;
 import com.quadint.app.web.controller.request.UserJoinRequest;
+import com.quadint.app.web.controller.response.MyPageResponse;
 import com.quadint.app.web.controller.response.Response;
 import com.quadint.app.web.service.FavoriteService;
 import com.quadint.app.web.service.UserService;
@@ -32,8 +33,15 @@ public class UserController {
         return Response.success();
     }
 
+    @GetMapping("/my-page")
+    public Response myPage(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        MyPageResponse myPage = userService.myPage(user.getId());
+        return Response.success(myPage);
+    }
+
     @GetMapping("/favorites")
-    public Response favorites(@PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+    public Response<List<Favorite>> favorites(@PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
                               Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         List<Favorite> favorites = favoriteService.favorites(user.getId(), pageable);

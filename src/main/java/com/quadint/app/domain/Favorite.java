@@ -1,7 +1,6 @@
 package com.quadint.app.domain;
 
 import com.quadint.app.domain.entity.FavoriteEntity;
-import com.quadint.app.domain.entity.LocationCoordinate;
 import lombok.Getter;
 
 @Getter
