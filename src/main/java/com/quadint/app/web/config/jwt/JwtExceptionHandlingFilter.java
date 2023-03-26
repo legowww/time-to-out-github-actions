@@ -25,7 +25,6 @@ public class JwtExceptionHandlingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-//            log.info("[JwtExceptionHandlingFilter]");
             String header = request.getHeader(HttpHeaders.AUTHORIZATION);
             if (header == null || !header.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);

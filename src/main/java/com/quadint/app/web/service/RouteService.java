@@ -157,6 +157,7 @@ public class RouteService {
 
         Collections.sort(routes);
 
+
         List<TimeRoute> optimalResult = addOutingTime(routes); //각 경로에 해당하는 첫 번째(정류장, 역)까지의 걷는 시간 추가
         if (optimalResult.size() == 0) {
             throw new TtoAppException("No results were found.");

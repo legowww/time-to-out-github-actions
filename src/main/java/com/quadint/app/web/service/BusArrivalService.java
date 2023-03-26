@@ -40,7 +40,6 @@ public class BusArrivalService {
                 break;
             }
         }
-        log.info("[info]busTimeResponse=" + busTimeResponse);
         return busTimeResponse;
     }
 
@@ -48,7 +47,6 @@ public class BusArrivalService {
         try {
             StringBuilder url = getBusArrivalStationUrl(bstopId, routeId);
             JSONObject json = XML.toJSONObject(url.toString());
-
 
             JSONObject serviceResult = (JSONObject) json.get("ServiceResult");
             JSONObject msgHeader = (JSONObject) serviceResult.get("msgHeader");

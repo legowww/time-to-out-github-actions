@@ -20,58 +20,67 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 @Slf4j
 public class SubwayArrivalService {
     private static final String SERVICE_KEY = "Qmn6U2M5L3CCbVN8qFLeOCoE4m7xcYqwHz31rjcejo4";
+
     private static final String SUBWAY_API_URL = "https://api.odsay.com/v1/api/subwayTimeTable";
 
     public SubwayTimeResponse getTimeResponse(String stationId, String wayCode) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDate nowDate = LocalDate.now();
+        ArrayList<LocalDateTime> result = new ArrayList<>();
 
-        List<LocalDateTime> result = new ArrayList<>();
-        SubwayTimeResponse subwayTimeResponse = SubwayTimeResponse.createSubwayTimeResponse(stationId, wayCode);
         try {
+            SubwayTimeResponse subwayTimeResponse = SubwayTimeResponse.createSubwayTimeResponse(stationId, wayCode);
             SubwayTimeDto subwayTimeDto = getSubwayArrivalStationTime(stationId, wayCode);
-
-            if (subwayTimeDto == null) {
-                return subwayTimeResponse;
-            }
-
             String idx = subwayTimeDto.getIdx();
-            String[] list = subwayTimeDto.getList();
+            String[][] list = subwayTimeDto.getList();
 
-            for (int i = 0; i < list.length - 1; i++) {
-                if (result.size() == 4)
-                    break;
-                if ((idx.compareTo("24") == 0) || (idx.compareTo("0") == 0)) {
-                    idx = "0";
-                    LocalDateTime cmp = LocalDateTime.of(nowDate, LocalTime.of(Integer.parseInt(idx), Integer.parseInt(list[i])));
-                    if(result.size() != 4)
+            if (idx.compareTo("24") == 0) {
+                for (int i = 0; i < list[0].length; i++) {
+                    if (result.size() == 4)
+                        break;
+                    LocalDateTime cmp = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, Integer.parseInt(list[0][i])));
+                    if (now.compareTo(cmp) < 0)
                         result.add(cmp);
                 }
-                if (list[i].compareTo(list[i + 1]) < 0) {
-                    LocalDateTime cmp = LocalDateTime.of(nowDate, LocalTime.of(Integer.parseInt(idx), Integer.parseInt(list[i])));
-                    if(now.compareTo(cmp) < 0 && (result.size() != 4))
+            } else if (idx.compareTo("23") == 0) {
+                for (int i = 0; i < list[1].length; i++) {
+                    if (result.size() == 4)
+                        break;
+                    LocalDateTime cmp = LocalDateTime.of(LocalDate.now(), LocalTime.of(Integer.parseInt(idx), Integer.parseInt(list[1][i])));
+                    if (now.compareTo(cmp) < 0)
                         result.add(cmp);
                 }
-                else if ((list[i].compareTo(list[i + 1]) > 0) && (i >= (list.length / 2 - 2))) {
-                    LocalDateTime cmp = LocalDateTime.of(nowDate, LocalTime.of(Integer.parseInt(idx), Integer.parseInt(list[i])));
-                    if(now.compareTo(cmp) < 0 && (result.size() != 4))
+
+                for (int i = 0; i < list[2].length; i++) {
+                    if (result.size() == 4)
+                        break;
+                    LocalDateTime cmp = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(0, Integer.parseInt(list[2][i])));
+                    if (now.compareTo(cmp) < 0)
                         result.add(cmp);
-                    idx = String.valueOf(Integer.parseInt(idx) + 1);
+                }
+            } else {
+                for (int i = 0; i < list[1].length; i++) {
+                    if (result.size() == 4)
+                        break;
+                    LocalDateTime cmp = LocalDateTime.of(LocalDate.now(), LocalTime.of(Integer.parseInt(idx), Integer.parseInt(list[1][i])));
+                    if (now.compareTo(cmp) < 0)
+                        result.add(cmp);
+                }
+
+                for (int i = 0; i < list[2].length; i++) {
+                    if (result.size() == 4)
+                        break;
+                    LocalDateTime cmp = LocalDateTime.of(LocalDate.now(), LocalTime.of(Integer.parseInt(idx) + 1, Integer.parseInt(list[2][i])));
+                    if (now.compareTo(cmp) < 0)
+                        result.add(cmp);
                 }
             }
-            if(result.size() != 4){
-                LocalDateTime cmp = LocalDateTime.of(nowDate, LocalTime.of(Integer.parseInt(idx), Integer.parseInt(list[list.length - 1])));
-                result.add(cmp);
-            }
+
             subwayTimeResponse.setTimes(result);
-            log.info("[info]subwayTimeResponse=" + subwayTimeResponse);
             return subwayTimeResponse;
         } catch (RuntimeException e) {
             throw new TtoAppException("[SubwayArrivalService.getTimeResponse]error");
@@ -81,6 +90,7 @@ public class SubwayArrivalService {
     private SubwayTimeDto getSubwayArrivalStationTime(String stationId, String wayCode) {
         try {
             LocalDateTime now = LocalDateTime.now();
+
             StringBuilder url = getSubwayArrivalStationUrl(stationId, wayCode);
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject) parser.parse(url.toString());
@@ -89,11 +99,10 @@ public class SubwayArrivalService {
             JSONObject time;
             String idx;
             String list;
-            String[] replaceList1;
             JSONObject time2;
             String list2;
-            String[] replaceList2;
-            String[] resultList = new String[0];
+
+            String[][] resultList = new String[3][10];
 
             if (String.valueOf(now.getDayOfWeek()).equals("SATURDAY")) {
                 JSONObject satList = (JSONObject) result.get("SatList");
@@ -105,18 +114,17 @@ public class SubwayArrivalService {
                             time = (JSONObject) times.get(19);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            resultList = splitList(list);
+                            resultList[0] = splitList(list);
                         }
                         else {
                             time = (JSONObject) times.get(now.getHour() - 5);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            replaceList1 = splitList(list);
+                            resultList[1] = splitList(list);
 
                             time2 = (JSONObject) times.get(now.getHour() - 5 + 1);
                             list2 = (String) time2.get("list");
-                            replaceList2 = splitList(list2);
-                            resultList = combineList(replaceList1, replaceList2);
+                            resultList[2] = splitList(list2);
                         }
                         return new SubwayTimeDto(idx, resultList);
                     }
@@ -129,19 +137,19 @@ public class SubwayArrivalService {
                             time = (JSONObject) times.get(19);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            resultList = splitList(list);
+                            resultList[0] = splitList(list);
                         }
                         else {
                             time = (JSONObject) times.get(now.getHour() - 5);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            replaceList1 = splitList(list);
+                            resultList[1] = splitList(list);
 
                             time2 = (JSONObject) times.get(now.getHour() - 5 + 1);
                             list2 = (String) time2.get("list");
-                            replaceList2 = splitList(list2);
-                            resultList = combineList(replaceList1, replaceList2);
+                            resultList[2] = splitList(list2);
                         }
+
                         return new SubwayTimeDto(idx, resultList);
                     }
                 }
@@ -158,18 +166,17 @@ public class SubwayArrivalService {
                             time = (JSONObject) times.get(19);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            resultList = splitList(list);
+                            resultList[0] = splitList(list);
                         }
                         else {
                             time = (JSONObject) times.get(now.getHour() - 5);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            replaceList1 = splitList(list);
+                            resultList[1] = splitList(list);
 
                             time2 = (JSONObject) times.get(now.getHour() - 5 + 1);
                             list2 = (String) time2.get("list");
-                            replaceList2 = splitList(list2);
-                            resultList = combineList(replaceList1, replaceList2);
+                            resultList[2] = splitList(list2);
                         }
                         return new SubwayTimeDto(idx, resultList);
                     }
@@ -182,18 +189,17 @@ public class SubwayArrivalService {
                             time = (JSONObject) times.get(19);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            resultList = splitList(list);
+                            resultList[0] = splitList(list);
                         }
                         else {
                             time = (JSONObject) times.get(now.getHour() - 5);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            replaceList1 = splitList(list);
+                            resultList[1] = splitList(list);
 
                             time2 = (JSONObject) times.get(now.getHour() - 5 + 1);
                             list2 = (String) time2.get("list");
-                            replaceList2 = splitList(list2);
-                            resultList = combineList(replaceList1, replaceList2);
+                            resultList[2] = splitList(list2);
                         }
                         return new SubwayTimeDto(idx, resultList);
                     }
@@ -209,18 +215,17 @@ public class SubwayArrivalService {
                             time = (JSONObject) times.get(19);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            resultList = splitList(list);
+                            resultList[0] = splitList(list);
                         }
                         else {
                             time = (JSONObject) times.get(now.getHour() - 5);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            replaceList1 = splitList(list);
+                            resultList[1] = splitList(list);
 
                             time2 = (JSONObject) times.get(now.getHour() - 5 + 1);
                             list2 = (String) time2.get("list");
-                            replaceList2 = splitList(list2);
-                            resultList = combineList(replaceList1, replaceList2);
+                            resultList[2] = splitList(list2);
                         }
                         return new SubwayTimeDto(idx, resultList);
                     }
@@ -233,18 +238,17 @@ public class SubwayArrivalService {
                             time = (JSONObject) times.get(19);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            resultList = splitList(list);
+                            resultList[0] = splitList(list);
                         }
                         else {
                             time = (JSONObject) times.get(now.getHour() - 5);
                             idx = time.get("Idx").toString();
                             list = (String) time.get("list");
-                            replaceList1 = splitList(list);
+                            resultList[1] = splitList(list);
 
                             time2 = (JSONObject) times.get(now.getHour() - 5 + 1);
                             list2 = (String) time2.get("list");
-                            replaceList2 = splitList(list2);
-                            resultList = combineList(replaceList1, replaceList2);
+                            resultList[2] = splitList(list2);
                         }
                         return new SubwayTimeDto(idx, resultList);
                     }
@@ -294,16 +298,7 @@ public class SubwayArrivalService {
             String b = String.valueOf(replaceList.charAt(i * 2 + 1));
             result[i] = a + b;
         }
-        return result;
-    }
 
-    private String[] combineList(String[] list1, String[] list2) {
-        List<String> l1 = new ArrayList(Arrays.asList(list1));
-        List<String> l2 = new ArrayList(Arrays.asList(list2));
-        l1.addAll(l2);
-
-        String[] result = new String[l1.size()];
-        result = l1.toArray(result);
         return result;
     }
 }

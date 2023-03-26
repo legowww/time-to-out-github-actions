@@ -82,7 +82,7 @@ public class TokenService {
             User user = (User) authentication.getPrincipal();
         }
         catch (RuntimeException e) {
-//            throw new TtoAppException("checkValidAuthentication exception");
+            throw new TtoAppException("checkValidAuthentication exception");
         }
     }
 
